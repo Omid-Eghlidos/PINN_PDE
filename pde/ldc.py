@@ -68,7 +68,7 @@ class LDC():
         self.xc = torch.cat([xbt, xlr]).to(self.processor)
         self.yc = torch.cat([ybt, ylr]).to(self.processor)
         self.uc = torch.cat([ubt, ulr]).to(self.processor)
-        self.vc = torch.cat([ubt, ulr]).to(self.processor)
+        self.vc = torch.cat([vbt, vlr]).to(self.processor)
         # Initial condition for the p
         self.p0  = torch.zeros(1, 1).to(self.processor)
 
@@ -109,7 +109,7 @@ class LDC():
         yp = torch.rand((self.ci, 1), requires_grad=True).to(self.processor)
         # Model prediction for the CI points
         UVP = model(torch.cat([xp, yp], dim=1))
-        U, V, P = UVP[:, 0].view(self.ci, 1), UVP[:, 1].view(self.ci, 1), UVP[:, 2].view(self.ci, 1)
+        U, V, P = UVP[:,0].view(self.ci,1), UVP[:,1].view(self.ci,1), UVP[:,2].view(self.ci,1)
         # Gradient of the velocity components and pressure
         Ux  = grad(U, xp, grad_outputs=torch.ones_like(U), create_graph=True)[0]
         Uy  = grad(U, yp, grad_outputs=torch.ones_like(U), create_graph=True)[0]
@@ -122,7 +122,7 @@ class LDC():
         Uyy = grad(Uy, yp, grad_outputs=torch.ones_like(Uy), create_graph=True)[0]
         Vxx = grad(Vx, xp, grad_outputs=torch.ones_like(Vx), create_graph=True)[0]
         Vyy = grad(Vy, yp, grad_outputs=torch.ones_like(Vy), create_graph=True)[0]
-        # Navier-Stoke's PDE prediction: Continuity (C), Momentum of u (Mu), and Momentum of v (Mv)
+        # Navier-Stoke's PDE: Continuity (C), Momentum of u (Mu), and Momentum of v (Mv)
         C  = Ux + Vy
         Mu = (U*Ux + V*Uy) + Px/self.rho - self.nu*(Uxx + Uyy)
         Mv = (U*Vx + V*Vy) + Py/self.rho - self.nu*(Vxx + Vyy)
