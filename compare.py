@@ -79,10 +79,8 @@ def plot_results(pde, path, results):
         output = f'{pde}_uxy.png'
     vmin, vmax = adjust_range(pde)
     if normalize:
-        # Normalize the result
-        R = vmax - vmin
-        u = vmin + ((u - numpy.min(u))*(R)) / (numpy.max(u) - numpy.min(u))
-    im = ax.pcolormesh(x, y, u, #vmin=vmin, vmax=vmax,
+        u = vmin + ((u - numpy.min(u))*(vmax - vmin)) / (numpy.max(u) - numpy.min(u))
+    im = ax.pcolormesh(x, y, u, vmin=vmin, vmax=vmax,
                                 rasterized=True, shading='gouraud', cmap='jet')
     adjust_axes(pde, ax)
     cbar = fig.colorbar(im, ax=ax, pad=0.01)
@@ -103,39 +101,26 @@ def plot_comparison(pde, path, results, reference):
     else:
         x, y, u = results['x'], results['y'], results['u']
         xr, yr, ur = reference['x'], reference['y'], reference['u']
+    error = numpy.abs(u - ur)
+    print(f'Accuracy = {numpy.linalg.norm(error):^6.2f}')
     # Normalize the result and reference to the same scale
+    vmin, vmax = adjust_range(pde)
     if normalize:
-        vmin, vmax = adjust_range(pde)
-        R = vmax - vmin
-        u = vmin + ((u - numpy.min(u))*(R)) / (numpy.max(u) - numpy.min(u))
-        ur = vmin + ((ur - numpy.min(ur))*(R)) / (numpy.max(ur) - numpy.min(ur))
+        u = vmin + ((u - numpy.min(u))*(vmax - vmin)) / (numpy.max(u) - numpy.min(u))
+        ur = vmin + ((ur - numpy.min(ur))*(vmax - vmin)) / (numpy.max(ur) - numpy.min(ur))
     for i in range(3):
         if i == 0:
             axes[i].set_title('Reference')
-            vmin, vmax = adjust_range(pde)
             im = axes[i].pcolormesh(xr, yr, ur, vmin=vmin, vmax=vmax,
             								rasterized=True, shading='gouraud', cmap='jet')
         elif i == 1:
             axes[i].set_title('Results')
-            vmin, vmax = adjust_range(pde)
             im = axes[i].pcolormesh(x, y, u, vmin=vmin, vmax=vmax,
                                              rasterized=True, shading='gouraud', cmap='jet')
         else:
             axes[i].set_title('Absolute Error')
-            Nres, Nref = len(u), len(ur)
-            if Nres > Nref:
-                mod = int(len(u)/len(ur))
-                error = numpy.abs(u[::mod, ::mod] - ur)
-                x, y = x[::mod, ::mod], y[::mod, ::mod]
-            elif Nres < Nref:
-                mod = int(len(ur)/len(u))
-                error = numpy.abs(u - ur[::mod, ::mod])
-            else:
-                error = numpy.abs(u - ur)
-            vmin, vmax = numpy.min(error), numpy.max(error)
-            im = axes[i].pcolormesh(x, y, error, vmin=0.0, vmax=vmax,
+            im = axes[i].pcolormesh(x, y, error, vmin=numpy.min(error), vmax=numpy.max(error),
             							rasterized=True, shading='gouraud', cmap='jet')
-            print(f'Accuracy = {numpy.linalg.norm(error):^6.2f}')
         adjust_axes(pde, axes[i])
         cbar = fig.colorbar(im, ax=axes[i], fraction=0.045, pad=0.05)
         cbar.set_label(r'$u$(\textbf{x})', labelpad=1.0)
@@ -150,11 +135,9 @@ def plot_ldc_results(pde, path, results):
     ''' Plot velocity magnitude and u, v, p, and streamline contour maps for a set of (x, y). '''
     # Plot the U, V, and P on the same figure
     pyplot.clf()
-    fig, axes = pyplot.subplots(1, 3, figsize=(6.5, 2.0), constrained_layout=True)
-    lims = {'u': [-1.0, 5.0], 'v': [-3.0, 1.0], 'p': [-1.0, 5.0]}
+    fig, axes = pyplot.subplots(1, 4, figsize=(6.5, 1.7), constrained_layout=True)
+    lims = {'u': [-1.0, 4.0], 'v': [-2.5, 1.25], 'p': [-1.0, 4.5]}
     for i, j in enumerate(lims):
-        if j == 'p':
-            results[j] *= -1
         axes[i].set_title(f'${j}$' + r'(\textbf{x})')
         im = axes[i].pcolormesh(results['x'], results['y'], results[j],
                                 vmin=lims[j][0], vmax=lims[j][1],
@@ -164,21 +147,21 @@ def plot_ldc_results(pde, path, results):
         s = 'abcdefghijkl'
         axes[i].text(-0.2, -0.2, f'({s[i]})', transform=axes[i].transAxes)
         #cbar.ax.set_yticks(numpy.round(numpy.linspace(vmin, vmax, 6), 2))
-    '''
     axes[i+1].set_title('Streamlines')
-    axes[i+1].streamplot(results['x'], results['y'], results['u'], results['v'],
-                         color=results['vel'], linewidth=0.5, density=0.5, cmap ='jet')
+    x = numpy.linspace(0,1, len(results['x']))
+    y = numpy.linspace(0,1, len(results['y']))
+    axes[i+1].streamplot(x, y, results['u'], results['v'], color=results['vel'],
+                                                    linewidth=0.2, cmap ='jet')
     adjust_axes(pde, axes[i+1])
     #cbar = fig.colorbar(im, ax=axes[i+1])
-    '''
     pyplot.savefig(f'{path}/LDC_uvp.png', dpi=300, bbox_inches='tight')
     pyplot.close()
 
     # Plot the velocity magnitude
     pyplot.clf()
     fig, ax = pyplot.subplots(1, 1, figsize=(3.5, 2.8))
-    im = ax.pcolormesh(results['x'][::-1, ::-1], results['y'][::-1,::-1], results['vel'][::-1,::-1],
-                       vmin=0.0, vmax=5.0, rasterized=True, shading='gouraud', cmap='jet')
+    im = ax.pcolormesh(results['x'], results['y'], results['vel'],
+                       rasterized=True, shading='gouraud', cmap='jet')
     adjust_axes(pde, ax)
     cbar.set_label(r'$||u$(\textbf{x})+$v$(\textbf{x})$||_2$', labelpad=1.0)
     cbar = fig.colorbar(im, ax=ax, pad=0.01)
