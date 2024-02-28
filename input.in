@@ -21,7 +21,7 @@ pde	Eikonal	eps	0.05
 
 # pde lid-driven cavity (LDC) scaling factor(A) kinemtic viscosity (nu) density (rho) length (L)
 # pde LDC A <value(float)> nu <value(float)> rho <value(float)> L <value(float)>
-pde	LDC	A	5	nu	0.01	rho	1.0	L	1.0
+pde	LDC	A	10	nu	0.01	rho	1.0	L	1.0
 
 ######################### Neural Network Settings #############################
 # Run the neural network on CPU or GPU (cuda) processor
@@ -48,7 +48,7 @@ optimizer	method	Adam
 
 # Number of epochs to run the neural network
 # epochs <number of iterations(int)>
-optimizer	epochs	50000
+optimizer	epochs	200000
 
 # Learning rate for the neural network
 # neural_network gamma <learning rate(float)>

@@ -28,7 +28,7 @@ from matplotlib import pyplot
 pyplot.rc('font', family='Times New Roman', size=8)
 pyplot.rc('text', usetex=True)
 pyplot.rc('mathtext', fontset='cm')
-normalize = True
+normalize = False
 
 
 def compare_results():
@@ -99,9 +99,9 @@ def plot_comparison(pde, path, results, reference):
     fig, axes = pyplot.subplots(1, 3, figsize=(6.5, 2.0))
     if 't' in results:
         x, y, u = results['t'], results['x'], results['u']
-        xr, yr, ur = reference['t'], reference['x'], -reference['u']
+        xr, yr, ur = reference['t'], reference['x'], reference['u']
     else:
-        x, y, u = results['x'], results['y'], -results['u']
+        x, y, u = results['x'], results['y'], results['u']
         xr, yr, ur = reference['x'], reference['y'], reference['u']
     # Normalize the result and reference to the same scale
     if normalize:
@@ -135,6 +135,7 @@ def plot_comparison(pde, path, results, reference):
             vmin, vmax = numpy.min(error), numpy.max(error)
             im = axes[i].pcolormesh(x, y, error, vmin=0.0, vmax=vmax,
             							rasterized=True, shading='gouraud', cmap='jet')
+            print(f'Accuracy = {numpy.linalg.norm(error):^6.2f}')
         adjust_axes(pde, axes[i])
         cbar = fig.colorbar(im, ax=axes[i], fraction=0.045, pad=0.05)
         cbar.set_label(r'$u$(\textbf{x})', labelpad=1.0)
@@ -155,7 +156,7 @@ def plot_ldc_results(pde, path, results):
         if j == 'p':
             results[j] *= -1
         axes[i].set_title(f'${j}$' + r'(\textbf{x})')
-        im = axes[i].pcolormesh(results['x'][::-1, ::-1], results['y'], results[j],
+        im = axes[i].pcolormesh(results['x'], results['y'], results[j],
                                 vmin=lims[j][0], vmax=lims[j][1],
                                 rasterized=True, shading='gouraud', cmap='jet')
         adjust_axes(pde, axes[i])
@@ -176,7 +177,7 @@ def plot_ldc_results(pde, path, results):
     # Plot the velocity magnitude
     pyplot.clf()
     fig, ax = pyplot.subplots(1, 1, figsize=(3.5, 2.8))
-    im = ax.pcolormesh(results['x'][::-1, ::-1], results['y'], results['vel'],
+    im = ax.pcolormesh(results['x'][::-1, ::-1], results['y'][::-1,::-1], results['vel'][::-1,::-1],
                        vmin=0.0, vmax=5.0, rasterized=True, shading='gouraud', cmap='jet')
     adjust_axes(pde, ax)
     cbar.set_label(r'$||u$(\textbf{x})+$v$(\textbf{x})$||_2$', labelpad=1.0)
