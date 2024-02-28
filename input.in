@@ -1,0 +1,65 @@
+############################## PDE Settings ###################################
+# Type of partial differential equation (PDE) to solve and its settings
+# pde solve <problem type: Burger/Elliptical/Helmholtz/Eikonal/LDC(default)>
+pde	solve	LDC
+
+# pde Burger kinematci voscosity (nu)
+# pde Burger nu <value(float)>
+pde Burger nu 0.01 
+
+# pde Elliptical scaling factor(alpha)
+# pde Elliptical alpha <value(float)> 
+pde	Elliptical	alpha	30
+
+# pde Helmholtz scaling factor(alpha)
+# pde Helmholtz alpha <value(float)> 
+pde	Helmholtz	ax	1	ay	4
+
+# pde Eikonal scaling factor(epsilon)
+# pde Eikonal eps <value(float)> 
+pde	Eikonal	eps	0.05
+
+# pde lid-driven cavity (LDC) scaling factor(A) kinemtic viscosity (nu) density (rho) length (L)
+# pde LDC A <value(float)> nu <value(float)> rho <value(float)> L <value(float)>
+pde	LDC	A	5	nu	0.01	rho	1.0	L	1.0
+
+######################### Neural Network Settings #############################
+# Run the neural network on CPU or GPU (cuda) processor
+# run processor <cpu/gpu>
+neural_network	processor	gpu
+
+# Total number of layers to be used 
+# neural_network layers <number of layers(int)>
+neural_network	layers	5
+
+# Number of neurons per hidden layer
+# neural_network neurons <number of neurons per layer(int)>
+neural_network	neurons	60
+
+# Activation functions to be used for hidden and output layers
+# neural_network activation hidden/output <linear/tanh>
+neural_network	activation	hidden	tanh
+neural_network	activation	output	linear
+
+###########################	Optimizer Settings ###############################
+# Optimization method to be used
+# optimizer method <Adam/LBFGS>
+optimizer	method	Adam
+
+# Number of epochs to run the neural network
+# epochs <number of iterations(int)>
+optimizer	epochs	50000
+
+# Learning rate for the neural network
+# neural_network gamma <learning rate(float)>
+optimizer	gamma	1e-3
+
+# Number of collocation points (ci) to be used for training and for results
+# optimizer ci train <number of points(int)> results <number of points>
+# NOTE: Select perfect square for number of train points in case of Elliptical and Helmholtz
+optimizer	ci	train	10000	results	1000
+
+# Half of the numer of points to be sampled across ICs/BCs (icbc)
+# optimizer icbc <number of points(int)>
+optimizer	icbc	500
+
