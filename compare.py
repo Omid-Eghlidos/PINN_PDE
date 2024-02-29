@@ -135,8 +135,8 @@ def plot_ldc_results(pde, path, results):
     ''' Plot velocity magnitude and u, v, p, and streamline contour maps for a set of (x, y). '''
     # Plot the U, V, and P on the same figure
     pyplot.clf()
-    fig, axes = pyplot.subplots(1, 4, figsize=(6.5, 1.7), constrained_layout=True)
-    lims = {'u': [-1.0, 4.0], 'v': [-2.5, 1.25], 'p': [-1.0, 4.5]}
+    fig, axes = pyplot.subplots(1, 3, figsize=(6.5, 2.0), constrained_layout=True)
+    lims = {'u': [-1.0, 6.5], 'v': [-1.0, 1.0], 'p': [-1.0, 1.0]}
     for i, j in enumerate(lims):
         axes[i].set_title(f'${j}$' + r'(\textbf{x})')
         im = axes[i].pcolormesh(results['x'], results['y'], results[j],
@@ -147,12 +147,12 @@ def plot_ldc_results(pde, path, results):
         s = 'abcdefghijkl'
         axes[i].text(-0.2, -0.2, f'({s[i]})', transform=axes[i].transAxes)
         #cbar.ax.set_yticks(numpy.round(numpy.linspace(vmin, vmax, 6), 2))
-    axes[i+1].set_title('Streamlines')
-    x = numpy.linspace(0,1, len(results['x']))
-    y = numpy.linspace(0,1, len(results['y']))
-    axes[i+1].streamplot(x, y, results['u'], results['v'], color=results['vel'],
-                                                    linewidth=0.2, cmap ='jet')
-    adjust_axes(pde, axes[i+1])
+    #axes[i+1].set_title('Streamlines')
+    #x = numpy.linspace(0,1, len(results['x']))
+    #y = numpy.linspace(0,1, len(results['y']))
+    #axes[i+1].streamplot(x, y, results['u'], results['v'], color=results['vel'],
+    #                                                linewidth=0.2, cmap ='jet')
+    #adjust_axes(pde, axes[i+1])
     #cbar = fig.colorbar(im, ax=axes[i+1])
     pyplot.savefig(f'{path}/LDC_uvp.png', dpi=300, bbox_inches='tight')
     pyplot.close()
@@ -161,6 +161,7 @@ def plot_ldc_results(pde, path, results):
     pyplot.clf()
     fig, ax = pyplot.subplots(1, 1, figsize=(3.5, 2.8))
     im = ax.pcolormesh(results['x'], results['y'], results['vel'],
+                       vmin=0.0, vmax=6.5,
                        rasterized=True, shading='gouraud', cmap='jet')
     adjust_axes(pde, ax)
     cbar.set_label(r'$||u$(\textbf{x})+$v$(\textbf{x})$||_2$', labelpad=1.0)
